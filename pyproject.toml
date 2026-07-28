@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
-authors = [{ name = "guadalupe-castillo", email = "guadalupe.castillo@iieg.gob.mx" }]
+authors = [{ name = "Guadalupe Castillo", email = "guadalupe.csln@gmail.com" }]
 keywords = ["banxico", "economics", "mexico", "sie", "time-series"]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",

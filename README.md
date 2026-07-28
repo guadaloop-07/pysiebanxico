@@ -5,8 +5,8 @@
 An independent Python client for querying time series, historical data, and
 metadata from Banco de México's Economic Information System (SIE).
 
-> Status: this package is in early development and does not yet provide a
-> stable public API.
+> Status: this package is in early development. Historical-series retrieval is
+> available; the public API may still change before version 0.1.0.
 
 ## Goal
 
@@ -31,11 +31,14 @@ import os
 from pysiebanxico import BanxicoClient
 
 client = BanxicoClient(token=os.environ["BANXICO_TOKEN"])
-observations = client.get_series_data(["SF43718"])
+series = client.get_series_data(["SF43718"], start_date="2024-01-01", end_date="2024-12-31")
+
+for observation in series[0].observations:
+    print(observation.date, observation.value)
 ```
 
-This example describes the target API; it will be available in the first
-functional release.
+Values such as `N/E`, `N.D.`, `ND`, `NA`, and `N/A` are exposed as `None` while
+the original text remains available through `Observation.raw_value`.
 
 ## Development
 
