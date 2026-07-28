@@ -37,6 +37,9 @@ for observation in series[0].observations:
     print(observation.date, observation.value)
 ```
 
+The client also exposes `get_current_value()` for the latest published
+observation and `get_series_metadata()` for series titles in Spanish or English.
+
 Values such as `N/E`, `N.D.`, `ND`, `NA`, and `N/A` are exposed as `None` while
 the original text remains available through `Observation.raw_value`.
 
