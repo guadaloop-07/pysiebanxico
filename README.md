@@ -44,6 +44,34 @@ limits, opt into limited retries with `BanxicoClient(max_retries=2)`.
 Values such as `N/E`, `N.D.`, `ND`, `NA`, and `N/A` are exposed as `None` while
 the original text remains available through `Observation.raw_value`.
 
+## Data utilities
+
+Use dependency-free helpers to index results or export plain records:
+
+```python
+from pysiebanxico import index_by_id, to_records
+
+fix = index_by_id(series)["SF43718"]
+records = to_records(series)
+```
+
+For pandas integration, install the optional extra:
+
+```bash
+python3 -m pip install "pysiebanxico[pandas]"
+```
+
+```python
+from pysiebanxico.pandas import metadata_to_dataframe, to_dataframe
+
+long = to_dataframe(series)
+wide = to_dataframe(series, layout="wide")
+metadata_frame = metadata_to_dataframe(metadata)
+```
+
+The long layout contains `series_id`, `title`, `date`, `value`, and `raw_value`.
+The wide layout uses dates as its index and series identifiers as columns.
+
 ## Development
 
 ```bash
