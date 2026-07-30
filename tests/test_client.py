@@ -86,6 +86,31 @@ def test_get_series_data_rejects_invalid_dates_and_too_many_series() -> None:
         client.get_series_data([f"SF{index}" for index in range(21)])
 
 
+def test_current_value_and_metadata_use_documented_endpoints() -> None:
+    session = FakeSession(
+        FakeResponse({"bmx": {"series": [{"idSerie": "SF43718", "titulo": "FIX"}]}})
+    )
+    client = BanxicoClient("token", base_url="https://example.test/v1", session=session)
+
+    metadata = client.get_series_metadata("SF43718", locale="en")
+    assert metadata[0].title == "FIX"
+    assert session.calls[-1][0] == "https://example.test/v1/series/SF43718?locale=en"
+
+    session.response = FakeResponse(
+        {
+            "bmx": {
+                "series": [{"idSerie": "SF43718", "datos": [{"fecha": "01/01/2024", "dato": "1"}]}]
+            }
+        }
+    )
+    current = client.get_current_value("SF43718")
+    assert current[0].observations[0].value == 1.0
+    assert session.calls[-1][0] == "https://example.test/v1/series/SF43718/datos/oportuno"
+
+    with pytest.raises(InvalidRequestError, match="locale"):
+        client.get_series_metadata("SF43718", locale="fr")
+
+
 def test_client_raises_public_errors_for_token_response_and_rate_limit() -> None:
     with pytest.raises(AuthenticationError, match="non-empty"):
         BanxicoClient(" ")

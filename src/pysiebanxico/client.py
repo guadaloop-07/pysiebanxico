@@ -16,8 +16,8 @@ from .exceptions import (
     RateLimitError,
     SeriesNotFoundError,
 )
-from .models import SeriesData
-from .parsing import parse_series_data
+from .models import SeriesData, SeriesMetadata
+from .parsing import parse_series_data, parse_series_metadata
 
 DEFAULT_BASE_URL = "https://www.banxico.org.mx/SieAPIRest/service/v1"
 MAX_SERIES_PER_REQUEST = 20
@@ -71,6 +71,20 @@ class BanxicoClient:
             path = f"{path}/{start.isoformat()}/{end.isoformat()}"
 
         return parse_series_data(self._get_json(path))
+
+    def get_current_value(self, series_ids: str | Sequence[str]) -> tuple[SeriesData, ...]:
+        """Return the most recently published observation for each requested series."""
+        ids = _validate_series_ids(series_ids)
+        return parse_series_data(self._get_json(f"/series/{','.join(ids)}/datos/oportuno"))
+
+    def get_series_metadata(
+        self, series_ids: str | Sequence[str], *, locale: str = "es"
+    ) -> tuple[SeriesMetadata, ...]:
+        """Return titles and identifiers for the requested SIE series."""
+        ids = _validate_series_ids(series_ids)
+        if locale not in {"es", "en"}:
+            raise InvalidRequestError("locale must be either 'es' or 'en'.")
+        return parse_series_metadata(self._get_json(f"/series/{','.join(ids)}?locale={locale}"))
 
     def _get_json(self, path: str) -> dict[str, Any]:
         try:

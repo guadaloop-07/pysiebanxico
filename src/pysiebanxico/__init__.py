@@ -9,7 +9,7 @@ from .exceptions import (
     RateLimitError,
     SeriesNotFoundError,
 )
-from .models import Observation, SeriesData
+from .models import Observation, SeriesData, SeriesMetadata
 
 __version__ = "0.1.0.dev0"
 
@@ -22,5 +22,6 @@ __all__ = [
     "Observation",
     "RateLimitError",
     "SeriesData",
+    "SeriesMetadata",
     "SeriesNotFoundError",
 ]

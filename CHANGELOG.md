@@ -11,3 +11,4 @@ project adheres to [Semantic Versioning](https://semver.org/).
 - Packaging, local validation, CI, and contribution-policy foundation.
 - Historical-series client with typed observations, date and token validation,
   SIE response parsing, and public error types.
+- Current-value and series-metadata client methods.

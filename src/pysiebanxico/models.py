@@ -23,3 +23,11 @@ class SeriesData:
     series_id: str
     title: str | None
     observations: tuple[Observation, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class SeriesMetadata:
+    """Metadata currently published by the SIE API for one series."""
+
+    series_id: str
+    title: str | None
