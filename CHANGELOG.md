@@ -14,3 +14,5 @@ project adheres to [Semantic Versioning](https://semver.org/).
 - Current-value and series-metadata client methods.
 - Environment-token configuration, automatic multi-request batching, and
   opt-in retries for transient SIE API failures.
+- Dependency-free record and series-index utilities, plus optional pandas
+  DataFrame conversions for historical data and metadata.
