@@ -26,11 +26,9 @@ python3 -m pip install pysiebanxico
 ## Planned usage
 
 ```python
-import os
-
 from pysiebanxico import BanxicoClient
 
-client = BanxicoClient(token=os.environ["BANXICO_TOKEN"])
+client = BanxicoClient()  # Reads BANXICO_TOKEN from the environment.
 series = client.get_series_data(["SF43718"], start_date="2024-01-01", end_date="2024-12-31")
 
 for observation in series[0].observations:
@@ -39,6 +37,9 @@ for observation in series[0].observations:
 
 The client also exposes `get_current_value()` for the latest published
 observation and `get_series_metadata()` for series titles in Spanish or English.
+It automatically splits requests containing more than 20 series, the maximum
+accepted by the SIE API. For transient network failures, server errors, or rate
+limits, opt into limited retries with `BanxicoClient(max_retries=2)`.
 
 Values such as `N/E`, `N.D.`, `ND`, `NA`, and `N/A` are exposed as `None` while
 the original text remains available through `Observation.raw_value`.

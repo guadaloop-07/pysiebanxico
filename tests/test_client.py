@@ -40,6 +40,19 @@ class FakeSession:
         return self.response
 
 
+class QueuedFakeSession(FakeSession):
+    def __init__(self, responses: list[FakeResponse | Exception]) -> None:
+        super().__init__(FakeResponse({}))
+        self.responses = responses
+
+    def get(self, url: str, *, timeout: float) -> FakeResponse:
+        self.calls.append((url, timeout))
+        response = self.responses.pop(0)
+        if isinstance(response, Exception):
+            raise response
+        return response
+
+
 def test_get_series_data_builds_range_request_and_parses_observations() -> None:
     session = FakeSession(
         FakeResponse(
@@ -75,15 +88,30 @@ def test_get_series_data_builds_range_request_and_parses_observations() -> None:
     assert result[0].observations[1].raw_value == "N/E"
 
 
-def test_get_series_data_rejects_invalid_dates_and_too_many_series() -> None:
+def test_get_series_data_rejects_invalid_dates() -> None:
     client = BanxicoClient("token", session=FakeSession(FakeResponse({"bmx": {"series": []}})))
 
     with pytest.raises(InvalidRequestError, match="provided together"):
         client.get_series_data("SF43718", start_date="2024-01-01")
     with pytest.raises(InvalidRequestError, match="must use YYYY-MM-DD"):
         client.get_series_data("SF43718", start_date="01/01/2024", end_date="2024-01-02")
-    with pytest.raises(InvalidRequestError, match="at most 20"):
-        client.get_series_data([f"SF{index}" for index in range(21)])
+
+
+def test_get_series_data_batches_requests_over_the_api_limit() -> None:
+    ids = [f"SF{index}" for index in range(21)]
+    session = QueuedFakeSession(
+        [
+            FakeResponse({"bmx": {"series": []}}),
+            FakeResponse({"bmx": {"series": []}}),
+        ]
+    )
+    client = BanxicoClient("token", base_url="https://example.test/v1", session=session)
+
+    assert client.get_series_data(ids) == ()
+    assert [call[0] for call in session.calls] == [
+        f"https://example.test/v1/series/{','.join(ids[:20])}/datos",
+        "https://example.test/v1/series/SF20/datos",
+    ]
 
 
 def test_current_value_and_metadata_use_documented_endpoints() -> None:
@@ -133,6 +161,47 @@ def test_client_raises_public_errors_for_token_response_and_rate_limit() -> None
     with pytest.raises(RateLimitError) as error:
         rate_limited.get_series_data("SF43718")
     assert error.value.seconds_to_reset == 30
+
+
+def test_client_reads_token_from_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("BANXICO_TOKEN", " environment-token ")
+    session = FakeSession(FakeResponse({"bmx": {"series": []}}))
+
+    BanxicoClient(session=session)
+
+    assert session.headers["Bmx-Token"] == "environment-token"
+
+
+def test_client_retries_rate_limits_and_server_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    sleeps: list[float] = []
+    monkeypatch.setattr("pysiebanxico.client.time.sleep", sleeps.append)
+    session = QueuedFakeSession(
+        [
+            FakeResponse({"bmx": {"secondsToReset": "3"}}, status_code=429),
+            FakeResponse({"bmx": {"series": []}}),
+            FakeResponse({"bmx": {"mensaje": "Unavailable"}}, status_code=503),
+            FakeResponse({"bmx": {"series": []}}),
+        ]
+    )
+    client = BanxicoClient("token", session=session, max_retries=1, retry_backoff=2)
+
+    assert client.get_series_data("SF43718") == ()
+    assert client.get_series_data("SF43718") == ()
+    assert sleeps == [3, 2]
+    assert len(session.calls) == 4
+
+
+def test_client_retries_network_errors() -> None:
+    session = QueuedFakeSession(
+        [
+            requests.ConnectionError("offline"),
+            FakeResponse({"bmx": {"series": []}}),
+        ]
+    )
+    client = BanxicoClient("token", session=session, max_retries=1, retry_backoff=0)
+
+    assert client.get_series_data("SF43718") == ()
+    assert len(session.calls) == 2
 
 
 def test_client_rejects_invalid_json() -> None:
