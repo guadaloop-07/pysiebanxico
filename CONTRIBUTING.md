@@ -9,7 +9,7 @@ and stable API for consuming Banco de México's SIE API.
 python3 -m venv .venv
 . .venv/bin/activate
 python3 -m pip install --upgrade pip
-python3 -m pip install -e ".[dev]"
+python3 -m pip install -e ".[dev,pandas]"
 pre-commit install
 ```
 

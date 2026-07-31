@@ -12,7 +12,7 @@ from .exceptions import (
 from .models import Observation, SeriesData, SeriesMetadata
 from .utilities import index_by_id, metadata_to_records, to_records
 
-__version__ = "0.1.0.dev0"
+__version__ = "0.1.0"
 
 __all__ = [
     "AuthenticationError",

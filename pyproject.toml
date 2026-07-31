@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pysiebanxico"
-version = "0.1.0.dev0"
+version = "0.1.0"
 description = "Independent Python client for Banco de México's SIE API"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -13,7 +13,7 @@ license-files = ["LICENSE"]
 authors = [{ name = "Guadalupe Castillo", email = "guadalupe.csln@gmail.com" }]
 keywords = ["banxico", "economics", "mexico", "sie", "time-series"]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
+  "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
   "Intended Audience :: Financial and Insurance Industry",
   "License :: OSI Approved :: MIT License",

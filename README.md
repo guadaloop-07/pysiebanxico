@@ -5,19 +5,19 @@
 An independent Python client for querying time series, historical data, and
 metadata from Banco de México's Economic Information System (SIE).
 
-> Status: this package is in early development. Historical-series retrieval is
-> available; the public API may still change before version 0.1.0.
+> Status: version 0.1.0 is the initial public release. The public API will
+> continue to evolve through documented, versioned releases.
 
 ## Goal
 
 `pysiebanxico` aims to provide a clear, typed, and tested interface for the SIE
-REST API. The first release will cover historical data, current values, and
-metadata; it will not include frequency conversion or a graphical interface.
+REST API. The initial public release covers historical data, current values,
+metadata, and optional pandas conversions. It does not include frequency
+conversion or a graphical interface.
 
 ## Installation
 
-The distribution has not yet been published to PyPI. Once a stable version is
-available, install it with:
+Install the package from PyPI:
 
 ```bash
 python3 -m pip install pysiebanxico
@@ -78,7 +78,7 @@ The wide layout uses dates as its index and series identifiers as columns.
 python3 -m venv .venv
 . .venv/bin/activate
 python3 -m pip install --upgrade pip
-python3 -m pip install -e ".[dev]"
+python3 -m pip install -e ".[dev,pandas]"
 pre-commit install
 pre-commit run --all-files
 pytest
